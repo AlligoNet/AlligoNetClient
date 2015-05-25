@@ -1,0 +1,9 @@
+C:\Users\jon\Desktop\AlligoClient\AlligoClient\bin\x86\Debug\AlligoClient.exe.config
+C:\Users\jon\Desktop\AlligoClient\AlligoClient\bin\x86\Debug\AlligoClient.exe
+C:\Users\jon\Desktop\AlligoClient\AlligoClient\bin\x86\Debug\AlligoClient.pdb
+C:\Users\jon\Desktop\AlligoClient\AlligoClient\obj\x86\Debug\AlligoClient.Form1.resources
+C:\Users\jon\Desktop\AlligoClient\AlligoClient\obj\x86\Debug\AlligoClient.Properties.Resources.resources
+C:\Users\jon\Desktop\AlligoClient\AlligoClient\obj\x86\Debug\AlligoClient.csproj.GenerateResource.Cache
+C:\Users\jon\Desktop\AlligoClient\AlligoClient\obj\x86\Debug\AlligoClient.exe
+C:\Users\jon\Desktop\AlligoClient\AlligoClient\obj\x86\Debug\AlligoClient.pdb
+C:\Users\jon\Desktop\AlligoClient\AlligoClient\obj\x86\Debug\AlligoClient.csprojResolveAssemblyReference.cache
