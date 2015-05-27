@@ -38,7 +38,7 @@
             // 
             // btnConnect
             // 
-            this.btnConnect.Location = new System.Drawing.Point(12, 227);
+            this.btnConnect.Location = new System.Drawing.Point(12, 126);
             this.btnConnect.Name = "btnConnect";
             this.btnConnect.Size = new System.Drawing.Size(75, 23);
             this.btnConnect.TabIndex = 0;
@@ -62,7 +62,7 @@
             // 
             // btnDisconnect
             // 
-            this.btnDisconnect.Location = new System.Drawing.Point(197, 227);
+            this.btnDisconnect.Location = new System.Drawing.Point(197, 126);
             this.btnDisconnect.Name = "btnDisconnect";
             this.btnDisconnect.Size = new System.Drawing.Size(75, 23);
             this.btnDisconnect.TabIndex = 3;
@@ -97,7 +97,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(284, 263);
+            this.ClientSize = new System.Drawing.Size(294, 163);
             this.Controls.Add(this.rememberCheckBox);
             this.Controls.Add(this.serverPickerCB);
             this.Controls.Add(this.btnDisconnect);

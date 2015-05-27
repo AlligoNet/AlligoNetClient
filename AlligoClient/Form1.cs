@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
 using System.Diagnostics;
+using System.Net.NetworkInformation;
 using System.Security.Cryptography;
 
 namespace AlligoClient
@@ -18,14 +19,12 @@ namespace AlligoClient
         public string host;
         public string port;
         public string name;
-        public bool loaded;
 
         public Server(string host, string port, string name)
         {
             this.host = host;
             this.port = port;
             this.name = name;
-            this.loaded = false;
         }
     };
 
@@ -61,6 +60,10 @@ namespace AlligoClient
         /* Initialise AlligoClient */
         private void Init()
         {
+            // Hide Currently unneeded button
+            btnDisconnect.Enabled = false;
+            btnDisconnect.Hide();
+
             if (IsFirstRun())
             {
                 if (IsSoftEtherInstalled() == false)
@@ -69,16 +72,44 @@ namespace AlligoClient
                 }
             }
 
+            //Create Alligo Network Adapter if needed
+            RunCMD(string.Format("/CLIENT localhost /OUT:AlligoLog.txt /CMD NicCreate {0}", "Alligo"));
+
             // Create Servers from Defaults
             for (int i = 0; i < servers.Length; i++)
             {
                 //Create Servers
-                RunCMD(string.Format("/CLIENT localhost /OUT:AlligoLog.txt /CMD AccountCreate {0} /SERVER:{1}:{2} /HUB:HALO /USERNAME:halo /NICNAME:VPN", servers[i].name, servers[i].host, servers[i].port));
+                RunCMD(string.Format("/CLIENT localhost /OUT:AlligoLog.txt /CMD AccountCreate {0} /SERVER:{1}:{2} /HUB:HALO /USERNAME:halo /NICNAME:Alligo", servers[i].name, servers[i].host, servers[i].port));
                 //Change Password Type
                 RunCMD(string.Format("/CLIENT localhost /CMD AccountPasswordSet {0} /PASSWORD:halo /TYPE:standard", servers[i].name)); //DO NOT INCLUDE LOG - SECURITY
             }
 
+
+            /* Disconnect all first just to be safe */
+            for (int i = 0; i < servers.Length; i++)
+            {
+                RunCMD(string.Format("/CLIENT localhost /OUT:AlligoLog.txt /CMD AccountDisconnect {0}", servers[i].name));
+            }
+
             LoadCredentials();
+        }
+
+        private string GetAlligoIP()
+        {
+            foreach (NetworkInterface nic in NetworkInterface.GetAllNetworkInterfaces())
+            {
+                foreach (UnicastIPAddressInformation ip in nic.GetIPProperties().UnicastAddresses)
+                {
+                    if (nic.Name.Contains("Alligo"))
+                    {
+                        if (ip.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                        {
+                            return ip.Address.ToString();                     
+                        }
+                    }
+                }
+            }
+            return "";
         }
 
         /* Connect to VPN via SoftEther */
@@ -106,7 +137,19 @@ namespace AlligoClient
             bool success = RunCMD(string.Format("/CLIENT localhost /OUT:AlligoLog.txt /CMD AccountConnect {0}", servers[selectedServer].name));
             if (success)
             {
-                //MessageBox.Show("Connected");
+                //Show Disconnect Button
+                btnDisconnect.Show();
+                btnDisconnect.Enabled = true;
+
+                //Hide Connect Button
+                btnConnect.Enabled = false;
+                btnConnect.Hide();
+
+                System.Threading.Thread.Sleep(5000); //Delay a little just to be sure
+
+                this.Text = string.Format("AlligoClient - Connected : {0}", GetAlligoIP());
+
+                MessageBox.Show("Connected Successfully!");
             }
         }
 
@@ -116,6 +159,16 @@ namespace AlligoClient
             bool success = RunCMD(string.Format("/CLIENT localhost /OUT:AlligoLog.txt /CMD AccountDisconnect {0}", servers[selectedServer].name));
             if (success)
             {
+                // Show Connect Button Again
+                btnConnect.Show();
+                btnConnect.Enabled = true;
+
+                // Hide Disconnect Button
+                btnDisconnect.Enabled = false;
+                btnDisconnect.Hide();
+
+                this.Text = string.Format("AlligoClient");
+
                 MessageBox.Show("Disconnected");
             }
         }
@@ -144,8 +197,6 @@ namespace AlligoClient
 
                 userName_txt.Text = credentials[1];
                 password_txt.Text = Decrypt(credentials[2]);
-                //userTxt.Text = credentials[1];
-                //passTxt.Text = Decrypt(credentials[2]);//credentials[2];
 
                 int result;
                 if (int.TryParse(credentials[3], out result))
@@ -261,7 +312,7 @@ namespace AlligoClient
         void Client_Closing(object sender, FormClosingEventArgs e)
         {
             RunCMD(string.Format("/CLIENT localhost /OUT:AlligoLog.txt /CMD AccountDisconnect {0}", servers[selectedServer].name));
-            System.Threading.Thread.Sleep(1000); //Delay a little just to be sure
+            System.Threading.Thread.Sleep(500); //Delay a little just to be sure
         }
 
         /* GENERATED BY VS */
