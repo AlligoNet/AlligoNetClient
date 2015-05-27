@@ -11,6 +11,8 @@ using System.IO;
 using System.Diagnostics;
 using System.Net.NetworkInformation;
 using System.Security.Cryptography;
+using System.Net;
+using System.Reflection;
 
 namespace AlligoClient
 {
@@ -32,19 +34,22 @@ namespace AlligoClient
     {
         Server[] servers = new Server[]
         {
-            new Server("quentin.crdnl.me", "443", "QuentinEU"),
-            new Server("sinon.crdnl.me", "5555", "SinonUSWest"),
-            new Server("eugeo.crdnl.me", "443", "EugeoUSEast")
+            new Server("quentin.alligo.co", "443", "QuentinEU"),
+            new Server("sinon.alligo.co", "443", "SinonUSWest"),
+            new Server("eugeo.alligo.co", "443", "EugeoUSEast"),
+            new Server("insignia.alligo.co", "443", "InsigniaOC")
         };
 
         private string SoftEtherPath = "C:\\Program Files\\SoftEther VPN Client\\vpncmd.exe";
 
         //User Creds
-        string userName, userPass;
+        private string userName, userPass;
 
         static readonly string PassHash = "REDACTED";
         static readonly string saltKey = "REDACTED";
         static readonly string viKey = "REDACTED";
+
+        private string versionCheckURL = "";
 
         private int selectedServer;
 
@@ -54,7 +59,83 @@ namespace AlligoClient
 
             FormClosing += Client_Closing;
 
-            Init();
+
+            if (IsSoftEtherInstalled() == false)
+            {
+                /* Extract and Run Updater with -install args */
+                Stream resource = GetType().Assembly.GetManifestResourceStream("AlligoClient.AlligoUpdater.exe");
+                byte[] bytes = new byte[(int)resource.Length];
+                resource.Read(bytes, 0, bytes.Length);
+                File.WriteAllBytes("AlligoUpdater.exe", bytes);
+
+                Process.Start("AlligoUpdater.exe", "install");
+
+                Application.Exit();
+            }
+            else
+            {
+                CheckForUpdates();
+            }
+        }
+
+        private void CheckForUpdates()
+        {
+            string clientVersion = AssemblyName.GetAssemblyName("AlligoClient.exe").Version.ToString();
+            string newVersion;
+
+            /* Delete Updater if it exists */
+            if(File.Exists("AlligoUpdater.exe"))
+            {
+                File.Delete("AlligoUpdater.exe");
+            }
+
+            using (WebClient vs = new WebClient())
+            {
+                Stream file = vs.OpenRead(versionCheckURL);
+                StreamReader parse = new StreamReader(file);
+                newVersion = parse.ReadToEnd();
+            }
+
+            newVersion = newVersion.Trim();
+
+            if (clientVersion.Equals(newVersion))
+            {
+                //Up to date
+                updateLbl.Text = "Up to Date";
+
+                //Hide Button since not required.
+                updateBtn.Enabled = false;
+                updateBtn.Hide();
+
+                //Init Alligo
+                Init();
+            }
+            else
+            {
+                //Not up to date
+                updateLbl.Text = "Update Available!";
+
+                //Show Update Button
+                updateBtn.Show();
+                updateBtn.Enabled = true;
+                btnConnect.Enabled = false;
+            }
+
+            currVersionLbl.Text = string.Format("Client Version: {0}", clientVersion);
+        }
+
+        /* Extracts and Runs Updater */
+        private void StartUpdate()
+        {
+            /* Extract */
+            Stream resource = GetType().Assembly.GetManifestResourceStream("AlligoClient.AlligoUpdater.exe");
+            byte[] bytes = new byte[(int)resource.Length];
+            resource.Read(bytes, 0, bytes.Length);
+            File.WriteAllBytes("AlligoUpdater.exe", bytes);
+
+            Process.Start("AlligoUpdater.exe");
+
+            Application.Exit();
         }
 
         /* Initialise AlligoClient */
@@ -63,14 +144,6 @@ namespace AlligoClient
             // Hide Currently unneeded button
             btnDisconnect.Enabled = false;
             btnDisconnect.Hide();
-
-            if (IsFirstRun())
-            {
-                if (IsSoftEtherInstalled() == false)
-                {
-                    //InstallSoftether
-                }
-            }
 
             //Create Alligo Network Adapter if needed
             RunCMD(string.Format("/CLIENT localhost /OUT:AlligoLog.txt /CMD NicCreate {0}", "Alligo"));
@@ -83,7 +156,6 @@ namespace AlligoClient
                 //Change Password Type
                 RunCMD(string.Format("/CLIENT localhost /CMD AccountPasswordSet {0} /PASSWORD:halo /TYPE:standard", servers[i].name)); //DO NOT INCLUDE LOG - SECURITY
             }
-
 
             /* Disconnect all first just to be safe */
             for (int i = 0; i < servers.Length; i++)
@@ -148,8 +220,6 @@ namespace AlligoClient
                 System.Threading.Thread.Sleep(5000); //Delay a little just to be sure
 
                 this.Text = string.Format("AlligoClient - Connected : {0}", GetAlligoIP());
-
-                MessageBox.Show("Connected Successfully!");
             }
         }
 
@@ -157,20 +227,17 @@ namespace AlligoClient
         private void Disconnect(int serverIndex)
         {
             bool success = RunCMD(string.Format("/CLIENT localhost /OUT:AlligoLog.txt /CMD AccountDisconnect {0}", servers[selectedServer].name));
-            if (success)
-            {
-                // Show Connect Button Again
-                btnConnect.Show();
-                btnConnect.Enabled = true;
 
-                // Hide Disconnect Button
-                btnDisconnect.Enabled = false;
-                btnDisconnect.Hide();
+            // Show Connect Button Again
+            btnConnect.Show();
+            btnConnect.Enabled = true;
 
-                this.Text = string.Format("AlligoClient");
+             // Hide Disconnect Button
+            btnDisconnect.Enabled = false;
+            btnDisconnect.Hide();
+            this.Text = string.Format("AlligoClient");
 
-                MessageBox.Show("Disconnected");
-            }
+            MessageBox.Show("Disconnected");
         }
 
 
@@ -226,20 +293,6 @@ namespace AlligoClient
             }
 
             return false;
-        }
-
-        /* First time running the app? */
-        private bool IsFirstRun()
-        {
-            if( File.Exists("AlligoPrefs.txt" ))
-            {
-                return false;
-            }
-            else
-            {
-                File.Create("AlligoPrefs.txt");
-                return true;
-            }
         }
 
         /* Executes commands sent to the vpncmd */
@@ -331,6 +384,11 @@ namespace AlligoClient
         private void btnDisconnect_Click(object sender, EventArgs e)
         {
             Disconnect(selectedServer);
+        }
+
+        private void updateBtn_Click(object sender, EventArgs e)
+        {
+            StartUpdate();
         }
     }
 }
