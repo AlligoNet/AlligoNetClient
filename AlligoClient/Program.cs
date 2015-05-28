@@ -16,7 +16,8 @@ namespace AlligoClient
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1());
+            Application.Run(new InitMessageForm());
+            //Application.Run(new Form1());
         }
     }
 }

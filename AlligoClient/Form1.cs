@@ -13,6 +13,7 @@ using System.Net.NetworkInformation;
 using System.Security.Cryptography;
 using System.Net;
 using System.Reflection;
+using System.Threading;
 
 namespace AlligoClient
 {
@@ -49,7 +50,7 @@ namespace AlligoClient
         static readonly string saltKey = "REDACTED";
         static readonly string viKey = "REDACTED";
 
-        private string versionCheckURL = "";
+        private string versionCheckURL = "https://updates.alligo.co/VERSION";
 
         private int selectedServer;
 
@@ -58,7 +59,6 @@ namespace AlligoClient
             InitializeComponent();
 
             FormClosing += Client_Closing;
-
 
             if (IsSoftEtherInstalled() == false)
             {
@@ -70,10 +70,11 @@ namespace AlligoClient
 
                 Process.Start("AlligoUpdater.exe", "install");
 
-                Application.Exit();
+                Environment.Exit(0);
             }
             else
             {
+                
                 CheckForUpdates();
             }
         }
@@ -81,7 +82,7 @@ namespace AlligoClient
         private void CheckForUpdates()
         {
             string clientVersion = AssemblyName.GetAssemblyName("AlligoClient.exe").Version.ToString();
-            string newVersion;
+            string newVersion = "0.0.0.0";
 
             /* Delete Updater if it exists */
             if(File.Exists("AlligoUpdater.exe"))
@@ -89,11 +90,25 @@ namespace AlligoClient
                 File.Delete("AlligoUpdater.exe");
             }
 
+            /* Delete Installer if it exists */
+            if (File.Exists("SoftEtherInstall.exe"))
+            {
+                File.Delete("SoftEtherInstall.exe");
+            }
+
             using (WebClient vs = new WebClient())
             {
-                Stream file = vs.OpenRead(versionCheckURL);
-                StreamReader parse = new StreamReader(file);
-                newVersion = parse.ReadToEnd();
+                try
+                {
+                    Stream file = vs.OpenRead(versionCheckURL);
+                    StreamReader parse = new StreamReader(file);
+                    newVersion = parse.ReadToEnd();
+                }
+                catch (Exception e)
+                {
+                    MessageBox.Show("ERROR: Failed to connect to update server.");
+                    Environment.Exit(0);
+                }
             }
 
             newVersion = newVersion.Trim();
@@ -101,19 +116,29 @@ namespace AlligoClient
             if (clientVersion.Equals(newVersion))
             {
                 //Up to date
-                updateLbl.Text = "Up to Date";
+                updateLbl.Text = "No Update Available";
+                updateLbl.ForeColor = Color.Cyan;
+                currVersionLbl.ForeColor = Color.Cyan;
 
                 //Hide Button since not required.
                 updateBtn.Enabled = false;
                 updateBtn.Hide();
 
                 //Init Alligo
-                Init();
+                var thread = new Thread(() =>
+                    {
+                        Init();
+                    }
+
+                );
+                thread.Start();
             }
             else
             {
                 //Not up to date
                 updateLbl.Text = "Update Available!";
+                updateLbl.ForeColor = Color.Red;
+                currVersionLbl.ForeColor = Color.Red;
 
                 //Show Update Button
                 updateBtn.Show();
@@ -217,7 +242,7 @@ namespace AlligoClient
                 btnConnect.Enabled = false;
                 btnConnect.Hide();
 
-                System.Threading.Thread.Sleep(5000); //Delay a little just to be sure
+                System.Threading.Thread.Sleep(1500); //Delay a little just to be sure
 
                 this.Text = string.Format("AlligoClient - Connected : {0}", GetAlligoIP());
             }
@@ -389,6 +414,11 @@ namespace AlligoClient
         private void updateBtn_Click(object sender, EventArgs e)
         {
             StartUpdate();
+        }
+
+        private void Form_Closed(object sender, FormClosedEventArgs e)
+        {
+            Application.Exit();
         }
     }
 }

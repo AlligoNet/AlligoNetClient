@@ -41,34 +41,48 @@
             // 
             // btnConnect
             // 
-            this.btnConnect.Location = new System.Drawing.Point(140, 221);
+            this.btnConnect.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnConnect.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            this.btnConnect.Location = new System.Drawing.Point(436, 405);
             this.btnConnect.Name = "btnConnect";
-            this.btnConnect.Size = new System.Drawing.Size(75, 23);
-            this.btnConnect.TabIndex = 0;
+            this.btnConnect.Size = new System.Drawing.Size(295, 45);
+            this.btnConnect.TabIndex = 4;
             this.btnConnect.Text = "Connect";
             this.btnConnect.UseVisualStyleBackColor = true;
             this.btnConnect.Click += new System.EventHandler(this.btnConnect_Click);
             // 
             // userName_txt
             // 
-            this.userName_txt.Location = new System.Drawing.Point(141, 108);
+            this.userName_txt.BackColor = System.Drawing.SystemColors.ControlLight;
+            this.userName_txt.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.userName_txt.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.userName_txt.ForeColor = System.Drawing.Color.White;
+            this.userName_txt.Location = new System.Drawing.Point(436, 60);
             this.userName_txt.Name = "userName_txt";
-            this.userName_txt.Size = new System.Drawing.Size(259, 20);
+            this.userName_txt.Size = new System.Drawing.Size(295, 35);
             this.userName_txt.TabIndex = 1;
             // 
             // password_txt
             // 
-            this.password_txt.Location = new System.Drawing.Point(140, 134);
+            this.password_txt.BackColor = System.Drawing.SystemColors.ControlLight;
+            this.password_txt.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.password_txt.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.password_txt.ForeColor = System.Drawing.Color.White;
+            this.password_txt.Location = new System.Drawing.Point(436, 123);
             this.password_txt.Name = "password_txt";
-            this.password_txt.Size = new System.Drawing.Size(259, 20);
+            this.password_txt.Size = new System.Drawing.Size(295, 35);
             this.password_txt.TabIndex = 2;
+            this.password_txt.UseSystemPasswordChar = true;
             // 
             // btnDisconnect
             // 
-            this.btnDisconnect.Location = new System.Drawing.Point(325, 221);
+            this.btnDisconnect.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnDisconnect.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            this.btnDisconnect.Location = new System.Drawing.Point(436, 405);
             this.btnDisconnect.Name = "btnDisconnect";
-            this.btnDisconnect.Size = new System.Drawing.Size(75, 23);
-            this.btnDisconnect.TabIndex = 3;
+            this.btnDisconnect.Size = new System.Drawing.Size(295, 45);
+            this.btnDisconnect.TabIndex = 5;
+            this.btnDisconnect.TabStop = false;
             this.btnDisconnect.Text = "Disconnect";
             this.btnDisconnect.UseVisualStyleBackColor = true;
             this.btnDisconnect.Click += new System.EventHandler(this.btnDisconnect_Click);
@@ -82,26 +96,30 @@
             "Sinon (US West)",
             "Eugeo (US East)",
             "Insignia (Oceanic)"});
-            this.serverPickerCB.Location = new System.Drawing.Point(141, 161);
+            this.serverPickerCB.Location = new System.Drawing.Point(436, 185);
             this.serverPickerCB.Name = "serverPickerCB";
-            this.serverPickerCB.Size = new System.Drawing.Size(258, 21);
-            this.serverPickerCB.TabIndex = 4;
+            this.serverPickerCB.Size = new System.Drawing.Size(295, 21);
+            this.serverPickerCB.TabIndex = 3;
             // 
             // rememberCheckBox
             // 
             this.rememberCheckBox.AutoSize = true;
-            this.rememberCheckBox.Location = new System.Drawing.Point(141, 189);
+            this.rememberCheckBox.BackColor = System.Drawing.Color.Transparent;
+            this.rememberCheckBox.ForeColor = System.Drawing.Color.White;
+            this.rememberCheckBox.Location = new System.Drawing.Point(436, 222);
             this.rememberCheckBox.Name = "rememberCheckBox";
             this.rememberCheckBox.Size = new System.Drawing.Size(95, 17);
-            this.rememberCheckBox.TabIndex = 5;
+            this.rememberCheckBox.TabIndex = 4;
             this.rememberCheckBox.Text = "Remember Me";
-            this.rememberCheckBox.UseVisualStyleBackColor = true;
+            this.rememberCheckBox.UseVisualStyleBackColor = false;
             // 
             // updateBtn
             // 
-            this.updateBtn.Location = new System.Drawing.Point(13, 220);
+            this.updateBtn.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.updateBtn.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            this.updateBtn.Location = new System.Drawing.Point(43, 405);
             this.updateBtn.Name = "updateBtn";
-            this.updateBtn.Size = new System.Drawing.Size(75, 23);
+            this.updateBtn.Size = new System.Drawing.Size(150, 45);
             this.updateBtn.TabIndex = 6;
             this.updateBtn.Text = "Update";
             this.updateBtn.UseVisualStyleBackColor = true;
@@ -110,6 +128,7 @@
             // currVersionLbl
             // 
             this.currVersionLbl.AutoSize = true;
+            this.currVersionLbl.BackColor = System.Drawing.Color.Transparent;
             this.currVersionLbl.Location = new System.Drawing.Point(13, 13);
             this.currVersionLbl.Name = "currVersionLbl";
             this.currVersionLbl.Size = new System.Drawing.Size(45, 13);
@@ -119,6 +138,7 @@
             // updateLbl
             // 
             this.updateLbl.AutoSize = true;
+            this.updateLbl.BackColor = System.Drawing.Color.Transparent;
             this.updateLbl.Location = new System.Drawing.Point(13, 30);
             this.updateLbl.Name = "updateLbl";
             this.updateLbl.Size = new System.Drawing.Size(17, 13);
@@ -129,7 +149,8 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(412, 254);
+            this.BackgroundImage = global::AlligoClient.Properties.Resources.bg;
+            this.ClientSize = new System.Drawing.Size(784, 462);
             this.Controls.Add(this.updateLbl);
             this.Controls.Add(this.currVersionLbl);
             this.Controls.Add(this.updateBtn);
@@ -142,7 +163,9 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
             this.Name = "Form1";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Alligo Client";
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form_Closed);
             this.ResumeLayout(false);
             this.PerformLayout();
 

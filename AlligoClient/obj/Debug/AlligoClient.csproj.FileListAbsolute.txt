@@ -16,3 +16,4 @@ F:\development\AlligoNet\Private\AlligoClient\AlligoClient\obj\Debug\AlligoClien
 F:\development\AlligoNet\Private\AlligoClient\AlligoClient\obj\Debug\AlligoClient.Properties.Resources.resources
 F:\development\AlligoNet\Private\AlligoClient\AlligoClient\obj\Debug\AlligoClient.csproj.GenerateResource.Cache
 F:\development\AlligoNet\Private\AlligoClient\AlligoClient\obj\Debug\AlligoClient.csprojResolveAssemblyReference.cache
+F:\development\AlligoNet\Private\AlligoClient\AlligoClient\obj\Debug\AlligoClient.InitMessageForm.resources
