@@ -14,6 +14,9 @@ using System.Security.Cryptography;
 using System.Net;
 using System.Reflection;
 using System.Threading;
+using System.Drawing.Text;
+using System.Runtime.InteropServices;
+using Microsoft.Win32;
 
 namespace AlligoClient
 {
@@ -33,6 +36,16 @@ namespace AlligoClient
 
     public partial class Form1 : Form
     {
+        [DllImport("gdi32", EntryPoint = "AddFontResource")]
+        public static extern int AddFontResourceA(string lpFileName);
+        [System.Runtime.InteropServices.DllImport("gdi32.dll")]
+        private static extern int AddFontResource(string lpszFilename);
+        [System.Runtime.InteropServices.DllImport("gdi32.dll")]
+        private static extern int CreateScalableFontResource(uint fdwHidden, string lpszFontRes, string lpszFontFile, string lpszCurrentPath);
+
+        /* Fonts */
+        string[] fonts = { "Roboto-Black.ttf", "Roboto-BlackItalic.ttf", "Roboto-Bold.ttf", "Roboto-BoldItalic.ttf", "Roboto-Italic.ttf", "Roboto-Light.ttf", "Roboto-LightItalic.ttf", "Roboto-Medium.ttf", "Roboto-MediumItalic.ttf", "Roboto-Regular.ttf", "Roboto-Thin.ttf", "Roboto-ThinItalic.ttf",  };
+
         Server[] servers = new Server[]
         {
             new Server("quentin.alligo.co", "443", "QuentinEU"),
@@ -58,6 +71,8 @@ namespace AlligoClient
         {
             InitializeComponent();
 
+            InitCustomFonts();
+
             FormClosing += Client_Closing;
 
             if (IsSoftEtherInstalled() == false)
@@ -74,9 +89,57 @@ namespace AlligoClient
             }
             else
             {
-                
                 CheckForUpdates();
             }
+        }
+
+        private void InitCustomFonts()
+        {            
+            /* Extract Fonts */
+            for(int i = 0; i < fonts.Length; i++)
+            {
+                string fontPath = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Fonts), fonts[i]);
+                if(!File.Exists(fontPath))
+                {
+                    /* Create Temp Folder Font */
+                    if(!Directory.Exists("\\temp"))
+                    {
+                        Directory.CreateDirectory("temp");
+                    }
+
+                    /* Extract the font */
+                    Stream resource = GetType().Assembly.GetManifestResourceStream(string.Format("AlligoClient.{0}", fonts[i]));
+                    byte[] bytes = new byte[(int)resource.Length];
+                    resource.Read(bytes, 0, bytes.Length);
+                    File.WriteAllBytes(string.Format("temp\\{0}", fonts[i]), bytes);
+
+                    /* Copy to Destination */
+                    File.Copy(string.Format("temp\\{0}", fonts[i]), fontPath);
+
+                    PrivateFontCollection fontCol = new PrivateFontCollection();
+                    fontCol.AddFontFile(fontPath);
+                    var actualFontName = fontCol.Families[0].Name;
+
+                    //Add font
+                    AddFontResource(fontPath);
+                    //Add registry entry  
+                    Registry.SetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts",
+                    actualFontName, fonts[i], RegistryValueKind.String);
+                }
+            }
+
+            if (Directory.Exists("temp"))
+            {
+                DirectoryInfo directory = new DirectoryInfo("temp");
+                Empty(directory);
+                Directory.Delete("temp");
+            }
+        }
+
+        public static void Empty(System.IO.DirectoryInfo directory)
+        {
+            foreach (System.IO.FileInfo file in directory.GetFiles()) file.Delete();
+            foreach (System.IO.DirectoryInfo subDirectory in directory.GetDirectories()) subDirectory.Delete(true);
         }
 
         private void CheckForUpdates()
@@ -116,13 +179,15 @@ namespace AlligoClient
             if (clientVersion.Equals(newVersion))
             {
                 //Up to date
-                updateLbl.Text = "No Update Available";
-                updateLbl.ForeColor = Color.Cyan;
-                currVersionLbl.ForeColor = Color.Cyan;
+                updateLbl.Text = "";
+                updateLbl.ForeColor = Color.WhiteSmoke;
+                currVersionLbl.ForeColor = Color.WhiteSmoke;
 
                 //Hide Button since not required.
                 updateBtn.Enabled = false;
                 updateBtn.Hide();
+
+                currVersionLbl.Text = string.Format("v{0}", clientVersion);
 
                 //Init Alligo
                 var thread = new Thread(() =>
@@ -137,16 +202,17 @@ namespace AlligoClient
             {
                 //Not up to date
                 updateLbl.Text = "Update Available!";
-                updateLbl.ForeColor = Color.Red;
-                currVersionLbl.ForeColor = Color.Red;
+                currVersionLbl.Hide();
+
 
                 //Show Update Button
                 updateBtn.Show();
                 updateBtn.Enabled = true;
+                btnConnect.Hide();
                 btnConnect.Enabled = false;
+                btnDisconnect.Hide();
+                btnDisconnect.Enabled = false;
             }
-
-            currVersionLbl.Text = string.Format("Client Version: {0}", clientVersion);
         }
 
         /* Extracts and Runs Updater */
@@ -169,6 +235,8 @@ namespace AlligoClient
             // Hide Currently unneeded button
             btnDisconnect.Enabled = false;
             btnDisconnect.Hide();
+
+            connectedLbl.Hide();
 
             //Create Alligo Network Adapter if needed
             RunCMD(string.Format("/CLIENT localhost /OUT:AlligoLog.txt /CMD NicCreate {0}", "Alligo"));
@@ -242,9 +310,11 @@ namespace AlligoClient
                 btnConnect.Enabled = false;
                 btnConnect.Hide();
 
-                System.Threading.Thread.Sleep(1500); //Delay a little just to be sure
+                System.Threading.Thread.Sleep(4000); //Delay a little just to be sure
+                currVersionLbl.Hide();
+                connectedLbl.Show();
 
-                this.Text = string.Format("AlligoClient - Connected : {0}", GetAlligoIP());
+                connectedLbl.Text = string.Format("Connected: {0}", GetAlligoIP());
             }
         }
 
@@ -260,7 +330,8 @@ namespace AlligoClient
              // Hide Disconnect Button
             btnDisconnect.Enabled = false;
             btnDisconnect.Hide();
-            this.Text = string.Format("AlligoClient");
+            currVersionLbl.Show();
+            connectedLbl.Hide();
 
             MessageBox.Show("Disconnected");
         }
@@ -387,13 +458,14 @@ namespace AlligoClient
             return Encoding.UTF8.GetString(plainTextBytes, 0, decryptedByteCount).TrimEnd("\0".ToCharArray());
         }
 
+        /* GENERATED BY VS */
+
         void Client_Closing(object sender, FormClosingEventArgs e)
         {
             RunCMD(string.Format("/CLIENT localhost /OUT:AlligoLog.txt /CMD AccountDisconnect {0}", servers[selectedServer].name));
             System.Threading.Thread.Sleep(500); //Delay a little just to be sure
         }
 
-        /* GENERATED BY VS */
         private void btnConnect_Click(object sender, EventArgs e)
         {
             selectedServer = serverPickerCB.SelectedIndex;
@@ -408,7 +480,7 @@ namespace AlligoClient
 
         private void btnDisconnect_Click(object sender, EventArgs e)
         {
-            Disconnect(selectedServer);
+
         }
 
         private void updateBtn_Click(object sender, EventArgs e)
@@ -419,6 +491,28 @@ namespace AlligoClient
         private void Form_Closed(object sender, FormClosedEventArgs e)
         {
             Application.Exit();
+        }
+
+        private void ServerSelection_DrawItem(object sender, DrawItemEventArgs e)
+        {
+
+        }
+
+        private void btnQuit_Click(object sender, EventArgs e)
+        {
+            RunCMD(string.Format("/CLIENT localhost /OUT:AlligoLog.txt /CMD AccountDisconnect {0}", servers[selectedServer].name));
+            System.Threading.Thread.Sleep(100); //Delay a little just to be sure
+            Application.Exit();
+        }
+
+        private void btnDisconnect_Click_1(object sender, EventArgs e)
+        {
+            Disconnect(selectedServer);
+        }
+
+        private void btnMinimise_Click(object sender, EventArgs e)
+        {
+            this.WindowState = FormWindowState.Minimized;
         }
     }
 }
